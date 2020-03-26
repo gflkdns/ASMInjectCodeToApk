@@ -21,9 +21,9 @@ class Main {
 
         if (args == null || args.length == 0) {
             println("[friendly reminder]: ")
-            println("\t\tjava -jar ApkInject.jar [xxx.apk] --keystore [path.keystore] [alias] [password] ")
-            println("\t\t[more]: https://github.com/miqt/ASMInjectCodeToApk ")
-            println("\t\t[contact me]: mailto:miqtdev@163.com")
+            println("\t[cmd]: java -jar ApkInject.jar [xxx.apk] --keystore [path.keystore] [alias] [password] ")
+            println("\t[more]: https://github.com/miqt/ASMInjectCodeToApk ")
+            println("\t[contact me]: mailto:miqtdev@163.com")
             //return
         }
 
@@ -75,7 +75,7 @@ class Main {
                         "--output",
                         dex2jar_jarPath
                 })
-                dex2JarTask.waitFor(30, TimeUnit.SECONDS)
+                dex2JarTask.waitFor(60, TimeUnit.SECONDS)
                 //inject jar file
                 println("[${it.name}] inject code")
                 def injectedJarFile = injectJar(new File(dex2jar_jarPath), new File(dex2jar_jarPath).parentFile)
@@ -89,7 +89,7 @@ class Main {
                         injectedDexPath,
                         injectedJarFile.absolutePath
                 })
-                jar2dexTask.waitFor(30, TimeUnit.SECONDS)
+                jar2dexTask.waitFor(60, TimeUnit.SECONDS)
                 println("[${it.name}] write to apk")
                 zipOut.write(new File(injectedDexPath).bytes)
             } else {
