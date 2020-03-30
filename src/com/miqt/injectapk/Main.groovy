@@ -1,6 +1,5 @@
 package com.miqt.injectapk
 
-import com.sun.deploy.security.JarSignature
 import jdk.internal.org.objectweb.asm.ClassReader
 import jdk.internal.org.objectweb.asm.ClassVisitor
 import jdk.internal.org.objectweb.asm.ClassWriter
@@ -18,15 +17,6 @@ import java.util.zip.ZipOutputStream
 
 class Main {
     static void main(String[] args) {
-
-        if (args == null || args.length == 0) {
-            println("[friendly reminder]: ")
-            println("\t[cmd]: java -jar ApkInject.jar [xxx.apk] --keystore [path.keystore] [alias] [password] ")
-            println("\t[more]: https://github.com/miqt/ASMInjectCodeToApk ")
-            println("\t[contact me]: mailto:miqtdev@163.com")
-            //return
-        }
-
         println("[sample]: start")
 
         def apkPath = "./sample_apk/app-debug_raw.apk"
@@ -70,7 +60,7 @@ class Main {
                 //dex2jar
                 def dex2jar_jarPath = dexFile.absolutePath.replace(".dex", "_dex2jar.jar")
                 def dex2JarTask = Runtime.getRuntime().exec(new String[]{
-                        "d2j-dex2jar.bat",
+                        "./tools/dex2jar-2.0/d2j-dex2jar.bat",
                         dexFile.absolutePath,
                         "--output",
                         dex2jar_jarPath
@@ -83,11 +73,11 @@ class Main {
                 //jar2dex
                 println("[${it.name}] jar2dex code")
                 def jar2dexTask = Runtime.getRuntime().exec(new String[]{
-                        "dx.bat",
-                        "--dex",
+                        "./tools/dex2jar-2.0/d2j-jar2dex.bat",
+                        injectedJarFile.absolutePath,
                         "--output",
                         injectedDexPath,
-                        injectedJarFile.absolutePath
+
                 })
                 jar2dexTask.waitFor(60, TimeUnit.SECONDS)
                 println("[${it.name}] write to apk")
