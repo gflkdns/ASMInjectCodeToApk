@@ -17,6 +17,15 @@ import java.util.zip.ZipOutputStream
 
 class Main {
     static void main(String[] args) {
+
+        if (args == null || args.length == 0) {
+            println("[friendly reminder]: ")
+            println("\t[cmd]: java -jar ApkInject.jar [xxx.apk] --keystore [path.keystore] [alias] [password] ")
+            println("\t[more]: https://github.com/miqt/ASMInjectCodeToApk ")
+            println("\t[contact me]: mailto:miqtdev@163.com")
+            return
+        }
+
         println("[sample]: start")
 
         def apkPath = "./sample_apk/app-debug_raw.apk"
