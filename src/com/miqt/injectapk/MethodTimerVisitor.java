@@ -61,7 +61,6 @@ public class MethodTimerVisitor extends ClassVisitor {
             }
 
             private boolean isInject() {
-
                 return true;
             }
 

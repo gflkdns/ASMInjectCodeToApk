@@ -23,12 +23,12 @@ class Main {
             println("\t[cmd]: java -jar ApkInject.jar [xxx.apk] --keystore [path.keystore] [alias] [password] ")
             println("\t[more]: https://github.com/miqt/ASMInjectCodeToApk ")
             println("\t[contact me]: mailto:miqtdev@163.com")
-            return
+            //return
         }
 
         println("[sample]: start")
 
-        def apkPath = "./sample_apk/app-debug_raw.apk"
+        def apkPath = "./sample_apk/app-debug.apk"
         def keystore = "./sample_apk/sign.keystore"
         def alias = "1111"
         def paasword = "111111"
@@ -63,7 +63,7 @@ class Main {
         zipFile.entries().each {
             zipOut.putNextEntry(new ZipEntry(it.name))
             if (it.name.endsWith(".dex") && !it.directory) {
-                println("[${it.name}] dex2jar")
+                println("[${new Date().format("yyyy-MM-dd HH:mm:ss") + " " + it.name}] dex2jar")
                 def dexFile = new File(tempPath, it.name)
                 FileUtils.writeByteArrayToFile(dexFile, zipFile.getInputStream(it).bytes, false)
                 //dex2jar
@@ -74,25 +74,26 @@ class Main {
                         "--output",
                         dex2jar_jarPath
                 })
-                dex2JarTask.waitFor(60, TimeUnit.SECONDS)
+                println("[${new Date().format("yyyy-MM-dd HH:mm:ss") + " " + it.name}] result : ${dex2JarTask.inputStream.text}")
+                dex2JarTask.waitFor()
                 //inject jar file
-                println("[${it.name}] inject code")
+                println("[${new Date().format("yyyy-MM-dd HH:mm:ss") + " " + it.name}] inject code")
                 def injectedJarFile = injectJar(new File(dex2jar_jarPath), new File(dex2jar_jarPath).parentFile)
                 def injectedDexPath = injectedJarFile.absolutePath.replace(".jar", ".dex")
                 //jar2dex
-                println("[${it.name}] jar2dex code")
+                println("[${new Date().format("yyyy-MM-dd HH:mm:ss") + " " + it.name}] jar2dex code")
                 def jar2dexTask = Runtime.getRuntime().exec(new String[]{
                         "./tools/dex2jar-2.0/d2j-jar2dex.bat",
                         injectedJarFile.absolutePath,
                         "--output",
                         injectedDexPath,
-
                 })
-                jar2dexTask.waitFor(60, TimeUnit.SECONDS)
-                println("[${it.name}] write to apk")
+                println("[${new Date().format("yyyy-MM-dd HH:mm:ss") + " " + it.name}] result : ${jar2dexTask.errorStream.text}")
+                jar2dexTask.waitFor()
+                println("[${new Date().format("yyyy-MM-dd HH:mm:ss") + " " + it.name}] write to apk")
                 zipOut.write(new File(injectedDexPath).bytes)
             } else {
-                println("[${it.name}] write to apk")
+                println("[${new Date().format("yyyy-MM-dd HH:mm:ss") + " " + it.name}] write to apk")
                 zipOut.write(zipFile.getInputStream(it).bytes)
             }
             zipOut.closeEntry()
