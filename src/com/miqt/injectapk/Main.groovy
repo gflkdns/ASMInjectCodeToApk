@@ -1,8 +1,9 @@
 package com.miqt.injectapk
 
-import jdk.internal.org.objectweb.asm.ClassReader
-import jdk.internal.org.objectweb.asm.ClassVisitor
-import jdk.internal.org.objectweb.asm.ClassWriter
+import groovyjarjarasm.asm.Opcodes
+import groovyjarjarasm.asm.ClassReader
+import groovyjarjarasm.asm.ClassVisitor
+import groovyjarjarasm.asm.ClassWriter
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
@@ -111,7 +112,7 @@ class Main {
     static byte[] injectClass(byte[] clazzBytes) {
         ClassReader cr = new ClassReader(clazzBytes)
         ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
-        ClassVisitor cv = new MethodTimerVisitor(cw)
+        ClassVisitor cv = new Leaning.TryCVisitor(Opcodes.ASM5,cw)
         cr.accept(cv, ClassReader.EXPAND_FRAMES)
         byte[] code = cw.toByteArray()
         return code

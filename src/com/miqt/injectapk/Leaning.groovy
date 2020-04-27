@@ -12,23 +12,35 @@ import org.apache.commons.io.FileUtils
 
 class Leaning {
     static void main(String[] args) {
-        def clazzBytes = new File("out/production/loadApkTool/com/miqt/injectapk/TestClass.class").bytes
-        byte[] code = InjectClass(clazzBytes)
-        FileUtils.writeByteArrayToFile(new File("out/production/loadApkTool/com/miqt/injectapk/TestClassGG.class"), code)
+        new File("E:\\javaproj\\loadApkTool\\out\\production\\loadApkTool\\com").eachFileRecurse {
+           if(it.isFile()){
+               def clazzBytes = it.bytes
+               byte[] code = InjectClass(clazzBytes)
+               FileUtils.writeByteArrayToFile(new File(it.getParent(), "temp_" + it.name), code)
+           }
+        }
+//        new File("E:\\androi_project\\ans-android-sdk\\ans-sdk\\release\\zip\\jar\\").eachFileRecurse {
+//            if(it.isFile()&&it.name.endsWith(".jar")){
+//                Main.injectJar(
+//                       it,
+//                        new File("E:\\androi_project\\ans-android-sdk\\ans-sdk\\release\\zip\\jar\\"))
+//            }
+//        }
+
     }
 
     private static byte[] InjectClass(byte[] clazzBytes) {
         ClassReader cr = new ClassReader(clazzBytes)
         ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
-        ClassVisitor cv = new TryCVisitor(Opcodes.ASM5, cw)
+        ClassVisitor cv = new TryCVisitor(Opcodes.ASM7, cw)
         cr.accept(cv, ClassReader.EXPAND_FRAMES)
         byte[] code = cw.toByteArray()
         code
     }
 
-    private final static class TryCVisitor extends ClassVisitor {
+    public final static class TryCVisitor extends ClassVisitor {
 
-        def className = null;
+        String className = null;
 
         TryCVisitor(int i, ClassVisitor classVisitor) {
             super(i, classVisitor)
@@ -42,47 +54,54 @@ class Leaning {
 
         @Override
         MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+            def isUnImplMethod = (access & Opcodes.ACC_ABSTRACT) != 0
+            if (isUnImplMethod) {
+                return super.visitMethod(access, name, descriptor, signature, exceptions)
+            }
             Type[] argsTypes = Type.getArgumentTypes(descriptor)
             Type returnType = Type.getReturnType(descriptor)
             boolean isStatic = (access & Opcodes.ACC_STATIC) != 0
 
             def mv = cv.visitMethod(access, name, descriptor, signature, exceptions)
-            mv = new AdviceAdapter(Opcodes.ASM5, mv, access, name, descriptor) {
+            mv = new AdviceAdapter(Opcodes.ASM7, mv, access, name, descriptor) {
+
                 @Override
-                protected void onMethodEnter() {
+                protected synchronized void onMethodEnter() {
                     getArgs()
-                    mv.visitMethodInsn(groovyjarjarasm.asm.Opcodes.INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
+                    mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
                             "enter",
-                            "(Ljava/lang/Object;" +
-                                    "Ljava/lang/String;" +
-                                    "Ljava/lang/String;" +
-                                    "Ljava/lang/String;" +
-                                    "Ljava/lang/String;" +
-                                    "[Ljava/lang/Object;" +
-                                    ")V",
+                            getAgesDesc(),
                             false);
+                    super.onMethodEnter()
                 }
 
                 @Override
-                protected void onMethodExit(int opcode) {
+                protected synchronized void onMethodExit(int opcode) {
+                    super.onMethodExit(opcode)
                     getArgs()
-                    mv.visitMethodInsn(groovyjarjarasm.asm.Opcodes.INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
-                            "enter",
-                            "(Ljava/lang/Object;" +
-                                    "Ljava/lang/String;" +
-                                    "Ljava/lang/String;" +
-                                    "Ljava/lang/String;" +
-                                    "Ljava/lang/String;" +
-                                    "[Ljava/lang/Object;" +
-                                    ")V",
+                    mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
+                            "exit",
+                            getAgesDesc(),
                             false);
+                }
+
+                private String getAgesDesc() {
+                    "(" +
+                            "Ljava/lang/Object;" +
+                            "Ljava/lang/String;" +
+                            "Ljava/lang/String;" +
+                            "Ljava/lang/String;" +
+                            "Ljava/lang/String;" +
+                            "[Ljava/lang/Object;" +
+                            ")V"
                 }
 
                 private void getArgs() {
+
                     if (isStatic) {
-                        mv.visitInsn(Opcodes.ACONST_NULL);//null
+                        mv.visitInsn(ACONST_NULL);//null
                     } else {
-                        mv.visitVarInsn(Opcodes.ALOAD, 0);//this
+                        mv.visitVarInsn(ALOAD, 0);//this
                     }
                     mv.visitLdcInsn(className);//className
                     mv.visitLdcInsn(name);//methodbName
@@ -90,30 +109,32 @@ class Leaning {
                     mv.visitLdcInsn(returnType.className);//returntype
 
                     getICONST(argsTypes == null ? 0 : argsTypes.length);
-                    mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
-                    for (int i = 0; i < argsTypes.length; i++) {
-                        mv.visitInsn(Opcodes.DUP);
-                        getICONST(i);
-                        getOpCodeLoad(argsTypes[i], isStatic ? (i) : (i + 1));
-                        mv.visitInsn(Opcodes.AASTORE);
+                    mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
+                    if (argsTypes != null) {
+                        for (int i = 0; i < argsTypes.length; i++) {
+                            mv.visitInsn(DUP);
+                            getICONST(i);
+                            getOpCodeLoad(argsTypes[i], isStatic ? (i) : (i + 1));
+                            mv.visitInsn(AASTORE);
+                        }
                     }
                 }
 
                 private void getICONST(int i) {
                     if (i == 0) {
-                        mv.visitInsn(Opcodes.ICONST_0);
+                        mv.visitInsn(ICONST_0);
                     } else if (i == 1) {
-                        mv.visitInsn(Opcodes.ICONST_1);
+                        mv.visitInsn(ICONST_1);
                     } else if (i == 2) {
-                        mv.visitInsn(Opcodes.ICONST_2);
+                        mv.visitInsn(ICONST_2);
                     } else if (i == 3) {
-                        mv.visitInsn(Opcodes.ICONST_3);
+                        mv.visitInsn(ICONST_3);
                     } else if (i == 4) {
-                        mv.visitInsn(Opcodes.ICONST_4);
+                        mv.visitInsn(ICONST_4);
                     } else if (i == 5) {
-                        mv.visitInsn(Opcodes.ICONST_5);
+                        mv.visitInsn(ICONST_5);
                     } else {
-                        mv.visitIntInsn(Opcodes.BIPUSH, i);
+                        mv.visitIntInsn(BIPUSH, i);
                     }
                 }
 

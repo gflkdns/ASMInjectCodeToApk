@@ -18,6 +18,14 @@ public class TimePrint {
     ) {
         M_PRINT.onMethodEnter(o, className, methodName, argsType, returnType, args);
     }
+    public static void enter2(String o,
+                             String className,
+                             String methodName,
+                             String argsType,
+                             String returnType
+    ) {
+        M_PRINT.onMethodEnter(o, className, methodName, argsType, returnType);
+    }
 
     public static void exit(Object o,
                            String className,

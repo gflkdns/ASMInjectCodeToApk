@@ -5,82 +5,156 @@
 
 package com.miqt.injectapk;
 
+
 import com.miqt.pluginlib.tools.TimePrint;
 
 public class TestClass {
     public TestClass() {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "<init>", "[]", "void", new Object[0]);
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "<init>", "[]", "void", new Object[0]);
+
+
     }
 
     private void intttt(boolean args) {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[boolean]", "void", new Object[]{args});
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[boolean]", "void", new Object[]{args});
+
+
     }
+
     private void intttt(int args) {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[boolean]", "void", new Object[]{args});
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[boolean]", "void", new Object[]{args});
+        TimePrint.enter2("com.miqt.injectapk.TestClass2", "com.miqt.injectapk.TestClass2", "a", "[java.lang.String, boolean, java.lang.Object]", "void");
+
     }
 
     private void intttt(long args) {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[long]", "void", new Object[]{args});
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[long]", "void", new Object[]{args});
+
+
     }
 
     private void intttt(short args) {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[short]", "void", new Object[]{args});
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[short]", "void", new Object[]{args});
+
+
     }
 
     private void intttt(double args) {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[double]", "void", new Object[]{args});
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[double]", "void", new Object[]{args});
+
+
     }
 
     private void intttt(byte args) {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[byte]", "void", new Object[]{args});
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[byte]", "void", new Object[]{args});
+
+
     }
 
     private void intttt(char args) {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[char]", "void", new Object[]{args});
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[char]", "void", new Object[]{args});
+
+
     }
 
     private void intttt(float args) {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[float]", "void", new Object[]{args});
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[float]", "void", new Object[]{args});
+
+
     }
 
     private void intttt(String args) {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[java.lang.String]", "void", new Object[]{args});
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "intttt", "[java.lang.String]", "void", new Object[]{args});
+
+
     }
 
-    public static void pubstatic() {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "pubstatic", "[]", "void", new Object[0]);
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "pubstatic", "[]", "void", new Object[0]);
+    public static void bytepubstatic(byte[] hello, String hello2) {
+
     }
 
     private static void pristatic() {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "pristatic", "[]", "void", new Object[0]);
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "pristatic", "[]", "void", new Object[0]);
+
+
     }
 
     private static String pristaticString(String hello) {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "pristaticString", "[java.lang.String]", "java.lang.String", new Object[]{hello});
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "pristaticString", "[java.lang.String]", "java.lang.String", new Object[]{hello});
+
+
         return null;
     }
 
     private static final String pristaticString(String hello, String hello2) {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "pristaticString", "[java.lang.String, java.lang.String]", "java.lang.String", new Object[]{hello, hello2});
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "pristaticString", "[java.lang.String, java.lang.String]", "java.lang.String", new Object[]{hello, hello2});
+
+
         return null;
     }
 
     static {
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "<clinit>", "[]", "void", new Object[0]);
-        TimePrint.enter((Object)null, "com.miqt.injectapk.TestClass", "<clinit>", "[]", "void", new Object[0]);
+
+
     }
+
+
+    /**
+     * 加密的key,应该跟插件中的key一致,不然会发生错误
+     */
+    public static final String key = "VBgIAFV";
+    public static final StringFogImpl FOG = new StringFogImpl();
+
+    public static String encrypt(String data) {
+        return FOG.encrypt(data, "123");
+    }
+
+    public static String decrypt(String data) {
+        return FOG.decrypt(data, "123");
+    }
+
+    public static boolean overflow(String data) {
+        return FOG.overflow(data, "123");
+    }
+
+    /**
+     * @Copyright 2019 analysys Inc. All rights reserved.
+     * @Description: 字符串混淆实现类
+     * @Version: 1.0
+     * @Create: 2019-11-06 11:40:04
+     * @author: miqt
+     * @mail: miqingtang@analysys.com.cn
+     */
+    public final static class StringFogImpl implements Cloneable {
+
+        private static final String CHARSET_NAME_UTF_8 = "UTF-8";
+
+        public String encrypt(String data, String key) {
+            return "newData";
+        }
+
+        public String decrypt(String data, String key) {
+            return "newData";
+        }
+
+        public boolean overflow(String data, String key) {
+            return data != null && data.length() * 4 / 3 >= 65535;
+        }
+
+        public byte[] xor(byte[] data, String key) {
+            int len = data.length;
+            int lenKey = key.length();
+            int i = 0;
+            int j = 0;
+            while (i < len) {
+                if (j >= lenKey) {
+                    j = 0;
+                }
+                data[i] = (byte) (data[i] ^ key.charAt(j));
+                i++;
+                j++;
+            }
+            class inner {
+                TestClass o = getInstance();
+            }
+            return data;
+        }
+
+    }
+
+    public static TestClass getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private static class Holder {
+        public static final TestClass INSTANCE = new TestClass();
+    }
+
 }
