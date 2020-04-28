@@ -13,11 +13,11 @@ import org.apache.commons.io.FileUtils
 class Leaning {
     static void main(String[] args) {
         new File("E:\\javaproj\\loadApkTool\\out\\production\\loadApkTool\\com").eachFileRecurse {
-           if(it.isFile()){
-               def clazzBytes = it.bytes
-               byte[] code = InjectClass(clazzBytes)
-               FileUtils.writeByteArrayToFile(new File(it.getParent(), "temp_" + it.name), code)
-           }
+            if (it.isFile() && it.name.contains("3")) {
+                def clazzBytes = it.bytes
+                byte[] code = InjectClass(clazzBytes)
+                FileUtils.writeByteArrayToFile(new File(it.getParent(), "gg.class"), code)
+            }
         }
 //        new File("E:\\androi_project\\ans-android-sdk\\ans-sdk\\release\\zip\\jar\\").eachFileRecurse {
 //            if(it.isFile()&&it.name.endsWith(".jar")){
@@ -111,11 +111,13 @@ class Leaning {
                     getICONST(argsTypes == null ? 0 : argsTypes.length);
                     mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
                     if (argsTypes != null) {
+                        def valLen = 0;
                         for (int i = 0; i < argsTypes.length; i++) {
                             mv.visitInsn(DUP);
                             getICONST(i);
-                            getOpCodeLoad(argsTypes[i], isStatic ? (i) : (i + 1));
+                            getOpCodeLoad(argsTypes[i], isStatic ? (valLen) : (valLen + 1));
                             mv.visitInsn(AASTORE);
+                            valLen += getlenByType(argsTypes[i])
                         }
                     }
                 }
@@ -201,6 +203,13 @@ class Leaning {
                     }
                 }
 
+                def int getlenByType(Type type) {
+                    if (type.equals(Type.DOUBLE_TYPE)
+                            || type.equals(Type.LONG_TYPE)) {
+                        return 2
+                    }
+                    return 1
+                }
             }
         }
     }

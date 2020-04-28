@@ -1,5 +1,7 @@
 package com.miqt.injectapk;
 
+import com.miqt.pluginlib.tools.TimePrint;
+
 import javax.naming.Context;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,9 +42,24 @@ public class TestClass2 {
 
         return null;
     }
+    private int  testeee(int  num) {
+        int b = num +1;
+        return b;
+    }
 
     public void a(Map<String, Object> map, PushListener pushListener) {
         try {
+
+            Object a1 = null;
+            Object a2 = null;
+            Object a3 = null;
+            Object a4 = null;
+            Object a5 = null;
+            Object a6 = null;
+            Object a7 = null;
+
+            TimePrint.enter(null, null, null, null, null, null, a1, a2, a3, a4, a5, a6, a7);
+
             int intValue = ((Integer) map.get("$action_type")).intValue();
             String str = (String) map.get("$action");
             String str2 = (String) map.get("$cpd");
