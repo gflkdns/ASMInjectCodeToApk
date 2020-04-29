@@ -7,26 +7,59 @@ import groovyjarjarasm.asm.MethodVisitor
 import groovyjarjarasm.asm.Opcodes
 import groovyjarjarasm.asm.Type
 import groovyjarjarasm.asm.commons.AdviceAdapter
-
+import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.IOUtils
+
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
+import java.util.zip.ZipEntry
 
 class Leaning {
     static void main(String[] args) {
-        new File("E:\\javaproj\\loadApkTool\\out\\production\\loadApkTool\\com").eachFileRecurse {
-            if (it.isFile() && it.name.contains("3")) {
+        new File("./out/production/loadApkTool/com").eachFileRecurse {
+            if (it.isFile() && it.name.contains("Test") && !it.name.contains("Inj_")) {
                 def clazzBytes = it.bytes
                 byte[] code = InjectClass(clazzBytes)
-                FileUtils.writeByteArrayToFile(new File(it.getParent(), "gg.class"), code)
+                FileUtils.writeByteArrayToFile(new File(it.getParent(), "Inj_" + it.name), code)
             }
         }
-//        new File("E:\\androi_project\\ans-android-sdk\\ans-sdk\\release\\zip\\jar\\").eachFileRecurse {
-//            if(it.isFile()&&it.name.endsWith(".jar")){
-//                Main.injectJar(
-//                       it,
-//                        new File("E:\\androi_project\\ans-android-sdk\\ans-sdk\\release\\zip\\jar\\"))
-//            }
-//        }
+        new File("./sample_files/").eachFileRecurse {
+            if (it.isFile() && it.name.endsWith(".jar")) {
+                injectJar(it, new File("./sample_files/"))
+            }
+        }
 
+    }
+
+    static File injectJar(File jarFile, File tempDir) {
+        def file = new JarFile(jarFile)
+        def hexName = DigestUtils.md5Hex(jarFile.absolutePath).substring(0, 8)
+        def outputJar = new File(tempDir, hexName + jarFile.name)
+        JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(outputJar))
+        Enumeration enumeration = file.entries()
+        while (enumeration.hasMoreElements()) {
+            JarEntry jarEntry = (JarEntry) enumeration.nextElement()
+            InputStream inputStream = file.getInputStream(jarEntry)
+            String entryName = jarEntry.getName()
+            ZipEntry zipEntry = new ZipEntry(entryName)
+            jarOutputStream.putNextEntry(zipEntry)
+            byte[] modifiedClassBytes = null
+            byte[] sourceClassBytes = IOUtils.toByteArray(inputStream)
+            if (entryName.endsWith(".class") && !entryName.contains("Time") /*&& !entryName.contains("\$")*/) {
+                modifiedClassBytes = InjectClass(sourceClassBytes)
+            }
+            if (modifiedClassBytes == null) {
+                jarOutputStream.write(sourceClassBytes)
+            } else {
+                jarOutputStream.write(modifiedClassBytes)
+            }
+            jarOutputStream.closeEntry()
+        }
+        jarOutputStream.close()
+        file.close()
+        return outputJar
     }
 
     private static byte[] InjectClass(byte[] clazzBytes) {
@@ -77,12 +110,63 @@ class Leaning {
 
                 @Override
                 protected synchronized void onMethodExit(int opcode) {
-                    super.onMethodExit(opcode)
-                    getArgs()
-                    mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
-                            "exit",
-                            getAgesDesc(),
-                            false);
+                    if (opcode >= IRETURN && opcode < RETURN) {
+                        if (returnType.sort == Type.LONG || returnType.sort == Type.DOUBLE) {
+                            super.visitInsn(DUP2)
+                        } else {
+                            super.visitInsn(DUP)
+                        }
+                        ClassUtils.autoBox(mv, returnType)
+
+                        if (isStatic) {
+                            mv.visitInsn(ACONST_NULL);//null
+                        } else {
+                            mv.visitVarInsn(ALOAD, 0);//this
+                        }
+
+                        mv.visitLdcInsn(className);//className
+                        mv.visitLdcInsn(name);//methodbName
+                        mv.visitLdcInsn(getArgsType());//argsTypes
+                        mv.visitLdcInsn(returnType.className);//returntype
+
+                        mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
+                                "exit",
+                                "(" +
+                                        "Ljava/lang/Object;" +
+                                        "Ljava/lang/Object;" +
+                                        "Ljava/lang/String;" +
+                                        "Ljava/lang/String;" +
+                                        "Ljava/lang/String;" +
+                                        "Ljava/lang/String;" +
+                                        ")V",
+                                false);
+                    } else if (opcode == Opcodes.RETURN) {
+                        super.visitInsn(Opcodes.ACONST_NULL)
+                        if (isStatic) {
+                            mv.visitInsn(ACONST_NULL);//null
+                        } else {
+                            mv.visitVarInsn(ALOAD, 0);//this
+                        }
+
+                        mv.visitLdcInsn(className);//className
+                        mv.visitLdcInsn(name);//methodbName
+                        mv.visitLdcInsn(getArgsType());//argsTypes
+                        mv.visitLdcInsn(returnType.className);//returntype
+
+                        mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
+                                "enter",
+                                "(" +
+                                        "Ljava/lang/Object;" +
+                                        "Ljava/lang/Object;" +
+                                        "Ljava/lang/String;" +
+                                        "Ljava/lang/String;" +
+                                        "Ljava/lang/String;" +
+                                        "Ljava/lang/String;" +
+                                        ")V",
+                                false);
+                    }
+
+
                 }
 
                 private String getAgesDesc() {

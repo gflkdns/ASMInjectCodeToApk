@@ -9,30 +9,23 @@ public class TimePrint {
      */
     private static final ITimePrint M_PRINT = new SampleTimePrint();
 
-    public static void enter(Object o,
+    public static void enter(Object thisObj,
                              String className,
                              String methodName,
                              String argsType,
                              String returnType,
                              Object... args
     ) {
-        M_PRINT.onMethodEnter(o, className, methodName, argsType, returnType, args);
-    }
-    public static void enter2(String o,
-                             String className,
-                             String methodName,
-                             String argsType,
-                             String returnType
-    ) {
-        M_PRINT.onMethodEnter(o, className, methodName, argsType, returnType);
+        M_PRINT.onMethodEnter(thisObj, className, methodName, argsType, returnType, args);
     }
 
-    public static void exit(Object o,
-                           String className,
-                           String methodName,
-                           String argsType,
-                           String returnType,
-                           Object... args) {
-        M_PRINT.onMethodReturn(o, className, methodName, argsType, returnType, args);
+
+    public static void exit(Object returnObj,
+                            Object thisObj,
+                            String className,
+                            String methodName,
+                            String argsType,
+                            String returnType) {
+        M_PRINT.onMethodReturn(returnObj, thisObj, className, methodName, argsType, returnType);
     }
 }

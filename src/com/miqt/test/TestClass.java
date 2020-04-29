@@ -3,10 +3,8 @@
 // (powered by Fernflower decompiler)
 //
 
-package com.miqt.injectapk;
+package com.miqt.test;
 
-
-import com.miqt.pluginlib.tools.TimePrint;
 
 public class TestClass {
     public TestClass() {
@@ -20,7 +18,6 @@ public class TestClass {
     }
 
     private void intttt(int args) {
-        TimePrint.enter2("com.miqt.injectapk.TestClass2", "com.miqt.injectapk.TestClass2", "a", "[java.lang.String, boolean, java.lang.Object]", "void");
 
     }
 
