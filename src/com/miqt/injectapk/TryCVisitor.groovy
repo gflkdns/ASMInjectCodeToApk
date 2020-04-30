@@ -6,7 +6,7 @@ import groovyjarjarasm.asm.Opcodes
 import groovyjarjarasm.asm.Type
 import groovyjarjarasm.asm.commons.AdviceAdapter
 
-class TryCVisitor extends ClassVisitor{
+class TryCVisitor extends ClassVisitor {
 
     String className = null;
 
@@ -45,61 +45,61 @@ class TryCVisitor extends ClassVisitor{
 
             @Override
             protected synchronized void onMethodExit(int opcode) {
-//                if (opcode >= IRETURN && opcode < RETURN) {
-//                    if (returnType.sort == Type.LONG || returnType.sort == Type.DOUBLE) {
-//                        mv.visitInsn(DUP2)
-//                    } else {
-//                        mv.visitInsn(DUP)
-//                    }
-//                    ClassUtils.autoBox(mv, returnType)
-//
-//                    if (isStatic) {
-//                        mv.visitInsn(ACONST_NULL);//null
-//                    } else {
-//                        mv.visitVarInsn(ALOAD, 0);//this
-//                    }
-//
-//                    mv.visitLdcInsn(className);//className
-////                        mv.visitLdcInsn(name);//methodbName
-////                        mv.visitLdcInsn(getArgsType());//argsTypes
-////                        mv.visitLdcInsn(returnType.className);//returntype
-//
-//                    mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
-//                            "exit",
-//                            "(" +
-//                                    "Ljava/lang/Object;" +
-//                                    "Ljava/lang/Object;" +
-//                                    "Ljava/lang/String;" +
-////                                        "Ljava/lang/String;" +
-////                                        "Ljava/lang/String;" +
-////                                        "Ljava/lang/String;" +
-//                                    ")V",
-//                            false);
-//                } else if (opcode == Opcodes.RETURN) {
-//                    mv.visitInsn(Opcodes.ACONST_NULL)
-//                    if (isStatic) {
-//                        mv.visitInsn(ACONST_NULL);//null
-//                    } else {
-//                        mv.visitVarInsn(ALOAD, 0);//this
-//                    }
-//
-//                    mv.visitLdcInsn(className);//className
-//                    mv.visitLdcInsn(name);//methodbName
-//                    mv.visitLdcInsn(getArgsType());//argsTypes
-//                    mv.visitLdcInsn(returnType.className);//returntype
-//
-//                    mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
-//                            "exit",
-//                            "(" +
-//                                    "Ljava/lang/Object;" +
-//                                    "Ljava/lang/Object;" +
-//                                    "Ljava/lang/String;" +
-//                                    "Ljava/lang/String;" +
-//                                    "Ljava/lang/String;" +
-//                                    "Ljava/lang/String;" +
-//                                    ")V",
-//                            false);
-//                }
+                if (opcode >= IRETURN && opcode < RETURN) {
+                    if (returnType.sort == Type.LONG || returnType.sort == Type.DOUBLE) {
+                        mv.visitInsn(DUP2)
+                    } else {
+                        mv.visitInsn(DUP)
+                    }
+                    ClassUtils.autoBox(mv, returnType)
+
+                    if (isStatic) {
+                        mv.visitInsn(ACONST_NULL);//null
+                    } else {
+                        mv.visitVarInsn(ALOAD, 0);//this
+                    }
+
+                    mv.visitLdcInsn(className);//className
+                    mv.visitLdcInsn(name);//methodbName
+                    mv.visitLdcInsn(getArgsType());//argsTypes
+                    mv.visitLdcInsn(returnType.className);//returntype
+
+                    mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
+                            "exit",
+                            "(" +
+                                    "Ljava/lang/Object;" +
+                                    "Ljava/lang/Object;" +
+                                    "Ljava/lang/String;" +
+                                    "Ljava/lang/String;" +
+                                    "Ljava/lang/String;" +
+                                    "Ljava/lang/String;" +
+                                    ")V",
+                            false);
+                } else if (opcode == Opcodes.RETURN) {
+                    mv.visitInsn(Opcodes.ACONST_NULL)
+                    if (isStatic) {
+                        mv.visitInsn(ACONST_NULL);//null
+                    } else {
+                        mv.visitVarInsn(ALOAD, 0);//this
+                    }
+
+                    mv.visitLdcInsn(className);//className
+                    mv.visitLdcInsn(name);//methodbName
+                    mv.visitLdcInsn(getArgsType());//argsTypes
+                    mv.visitLdcInsn(returnType.className);//returntype
+
+                    mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
+                            "exit",
+                            "(" +
+                                    "Ljava/lang/Object;" +
+                                    "Ljava/lang/Object;" +
+                                    "Ljava/lang/String;" +
+                                    "Ljava/lang/String;" +
+                                    "Ljava/lang/String;" +
+                                    "Ljava/lang/String;" +
+                                    ")V",
+                            false);
+                }
 
 
             }
