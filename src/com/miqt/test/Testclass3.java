@@ -18,4 +18,16 @@ public class Testclass3 {
             return n3;
         }
     }
+    private long tttll(long n1,float n2,int n3,byte n4,short n5,char n6,String n7,boolean n8,double n9 ,byte[] n10) {
+        try {
+            if("i".endsWith("i")){
+                return Integer.valueOf(100);
+            }
+            int a = (int) (100/n2);
+            return a;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return n3;
+        }
+    }
 }

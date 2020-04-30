@@ -29,8 +29,8 @@ class Main {
 
         println("[sample]: start")
 
-        def apkPath = "./sample_apk/app-debug.apk"
-        def keystore = "./sample_apk/sign.keystore"
+        def apkPath = "./sample_files/app-release.apk"
+        def keystore = "./sample_files/sign.keystore"
         def alias = "1111"
         def paasword = "111111"
 
@@ -49,21 +49,22 @@ class Main {
         def outPath = apkFile.parent + File.separator + "output";
         def tempPath = apkFile.parent + File.separator + "temp";
 
-        if (!new File(outPath).exists()) {
-            new File(outPath).mkdirs()
-        }
-        if (!new File(tempPath).exists()) {
-            new File(tempPath).mkdirs()
-        }
+        FileUtils.deleteDirectory(new File(outPath))
+        FileUtils.deleteDirectory(new File(tempPath))
+        FileUtils.forceMkdir(outPath as File)
+        FileUtils.forceMkdir(tempPath as File)
 
         def zipFile = new ZipFile(apkFile)
         def outApkFile = new File(outPath, apkFile.name)
         def outputStream = new FileOutputStream(outApkFile)
         def zipOut = new ZipOutputStream(outputStream)
+
+        def dexIndex =1;
         //遍历Apk文件
         zipFile.entries().each {
             zipOut.putNextEntry(new ZipEntry(it.name))
             if (it.name.endsWith(".dex") && !it.directory) {
+                dexIndex ++;
                 println("[${new Date().format("yyyy-MM-dd HH:mm:ss") + " " + it.name}] dex2jar")
                 def dexFile = new File(tempPath, it.name)
                 FileUtils.writeByteArrayToFile(dexFile, zipFile.getInputStream(it).bytes, false)
@@ -79,15 +80,14 @@ class Main {
                 dex2JarTask.waitFor()
                 //inject jar file
                 println("[${new Date().format("yyyy-MM-dd HH:mm:ss") + " " + it.name}] inject code")
-                def injectedJarFile = injectJar(new File(dex2jar_jarPath), new File(dex2jar_jarPath).parentFile)
+                def injectedJarFile = InjectUtils.injectJar(new File(dex2jar_jarPath), new File(dex2jar_jarPath).parentFile)
                 def injectedDexPath = injectedJarFile.absolutePath.replace(".jar", ".dex")
                 //jar2dex
                 println("[${new Date().format("yyyy-MM-dd HH:mm:ss") + " " + it.name}] jar2dex code")
                 def jar2dexTask = Runtime.getRuntime().exec(new String[]{
-                        "./tools/dex2jar-2.0/d2j-jar2dex.bat",
-                        injectedJarFile.absolutePath,
-                        "--output",
+                        "dx.bat","--dex","--output",
                         injectedDexPath,
+                        injectedJarFile.absolutePath
                 })
                 println("[${new Date().format("yyyy-MM-dd HH:mm:ss") + " " + it.name}] result : ${jar2dexTask.errorStream.text}")
                 jar2dexTask.waitFor()
@@ -99,6 +99,12 @@ class Main {
             }
             zipOut.closeEntry()
         }
+        // copy libs
+        zipOut.putNextEntry(new ZipEntry("classes${dexIndex}.dex"))
+        zipOut.write(new File("./sample_files/libs/lib.dex").bytes)
+        zipOut.closeEntry()
+        // copy libs end
+
         zipOut.flush()
         zipOut.finish()
         zipOut.close()
@@ -108,45 +114,6 @@ class Main {
         signApk(outApkFile.absolutePath, outApkFile.absolutePath.replace(".apk", "_sign.apk"), keystore, paasword, alias)
         println("[SUCCESS] finish !")
     }
-
-    static byte[] injectClass(byte[] clazzBytes) {
-        ClassReader cr = new ClassReader(clazzBytes)
-        ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
-        ClassVisitor cv = new Leaning.TryCVisitor(Opcodes.ASM5,cw)
-        cr.accept(cv, ClassReader.EXPAND_FRAMES)
-        byte[] code = cw.toByteArray()
-        return code
-    }
-
-    static File injectJar(File jarFile, File tempDir) {
-        def file = new JarFile(jarFile)
-        def hexName = DigestUtils.md5Hex(jarFile.absolutePath).substring(0, 8)
-        def outputJar = new File(tempDir, hexName + jarFile.name)
-        JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(outputJar))
-        Enumeration enumeration = file.entries()
-        while (enumeration.hasMoreElements()) {
-            JarEntry jarEntry = (JarEntry) enumeration.nextElement()
-            InputStream inputStream = file.getInputStream(jarEntry)
-            String entryName = jarEntry.getName()
-            ZipEntry zipEntry = new ZipEntry(entryName)
-            jarOutputStream.putNextEntry(zipEntry)
-            byte[] modifiedClassBytes = null
-            byte[] sourceClassBytes = IOUtils.toByteArray(inputStream)
-            if (entryName.endsWith(".class") && !entryName.contains("Time") /*&& !entryName.contains("\$")*/) {
-                modifiedClassBytes = injectClass(sourceClassBytes)
-            }
-            if (modifiedClassBytes == null) {
-                jarOutputStream.write(sourceClassBytes)
-            } else {
-                jarOutputStream.write(modifiedClassBytes)
-            }
-            jarOutputStream.closeEntry()
-        }
-        jarOutputStream.close()
-        file.close()
-        return outputJar
-    }
-
     static boolean signApk(String sourcePath, String targetPath, String key,
                            String passwd, String alias) {
         if (sourcePath == null || targetPath == null || passwd == null || key == null)
