@@ -22,13 +22,17 @@ class TryCVisitor extends ClassVisitor {
 
     @Override
     MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        def isInit = name == "<init>"
+        def isStaticInit = name == "<clinit>"
         def isUnImplMethod = (access & Opcodes.ACC_ABSTRACT) != 0
-        if (isUnImplMethod) {
+        if (isUnImplMethod || isInit || isStaticInit) {
             return super.visitMethod(access, name, descriptor, signature, exceptions)
         }
+
         Type[] argsTypes = Type.getArgumentTypes(descriptor)
         Type returnType = Type.getReturnType(descriptor)
-        boolean isStatic = (access & Opcodes.ACC_STATIC) != 0
+        def isStatic = (access & Opcodes.ACC_STATIC) != 0
+
 
         def mv = cv.visitMethod(access, name, descriptor, signature, exceptions)
         mv = new AdviceAdapter(Opcodes.ASM7, mv, access, name, descriptor) {

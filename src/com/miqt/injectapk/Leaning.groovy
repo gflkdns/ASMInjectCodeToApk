@@ -1,6 +1,5 @@
 package com.miqt.injectapk
 
-
 class Leaning {
     static void main(String[] args) {
         new File("./sample_files/").eachFileRecurse {
@@ -9,5 +8,10 @@ class Leaning {
             }
         }
 
+        new File("out/production/loadApkTool/com/miqt/test").eachFileRecurse {
+            if (it.isFile() && it.name.endsWith(".class")) {
+                it.bytes = InjectUtils.injectClass(it.bytes)
+            }
+        }
     }
 }
