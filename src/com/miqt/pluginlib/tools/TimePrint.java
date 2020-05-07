@@ -25,7 +25,8 @@ public class TimePrint {
                             String className,
                             String methodName,
                             String argsType,
-                            String returnType) {
-        M_PRINT.onMethodReturn(returnObj, thisObj, className, methodName, argsType, returnType);
+                            String returnType,
+                            Object... args) {
+        M_PRINT.onMethodReturn(returnObj, thisObj, className, methodName, argsType, returnType, args);
     }
 }

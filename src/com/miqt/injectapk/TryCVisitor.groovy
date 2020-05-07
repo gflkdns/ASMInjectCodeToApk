@@ -25,7 +25,7 @@ class TryCVisitor extends ClassVisitor {
         def isInit = name == "<init>"
         def isStaticInit = name == "<clinit>"
         def isUnImplMethod = (access & Opcodes.ACC_ABSTRACT) != 0
-        if (isUnImplMethod || isInit || isStaticInit) {
+        if (isUnImplMethod) {
             return super.visitMethod(access, name, descriptor, signature, exceptions)
         }
 
@@ -42,13 +42,21 @@ class TryCVisitor extends ClassVisitor {
                 getArgs()
                 mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
                         "enter",
-                        getAgesDesc(),
+                        "(" +
+                                "Ljava/lang/Object;" +
+                                "Ljava/lang/String;" +
+                                "Ljava/lang/String;" +
+                                "Ljava/lang/String;" +
+                                "Ljava/lang/String;" +
+                                "[Ljava/lang/Object;" +
+                                ")V",
                         false);
                 super.onMethodEnter()
             }
 
             @Override
             protected synchronized void onMethodExit(int opcode) {
+                //有返回值的装载返回值参数，无返回值的装载null
                 if (opcode >= IRETURN && opcode < RETURN) {
                     if (returnType.sort == Type.LONG || returnType.sort == Type.DOUBLE) {
                         mv.visitInsn(DUP2)
@@ -56,72 +64,45 @@ class TryCVisitor extends ClassVisitor {
                         mv.visitInsn(DUP)
                     }
                     ClassUtils.autoBox(mv, returnType)
-
-                    if (isStatic) {
-                        mv.visitInsn(ACONST_NULL);//null
-                    } else {
-                        mv.visitVarInsn(ALOAD, 0);//this
-                    }
-
-                    mv.visitLdcInsn(className);//className
-                    mv.visitLdcInsn(name);//methodbName
-                    mv.visitLdcInsn(getArgsType());//argsTypes
-                    mv.visitLdcInsn(returnType.className);//returntype
-
+                    getArgs()
                     mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
                             "exit",
                             "(" +
-                                    "Ljava/lang/Object;" +
-                                    "Ljava/lang/Object;" +
+                                    "Ljava/lang/Object;" + //return
+                                    "Ljava/lang/Object;" + //this
                                     "Ljava/lang/String;" +
                                     "Ljava/lang/String;" +
                                     "Ljava/lang/String;" +
                                     "Ljava/lang/String;" +
+                                    "[Ljava/lang/Object;" +//prams
                                     ")V",
                             false);
-                } else if (opcode == Opcodes.RETURN) {
-                    mv.visitInsn(Opcodes.ACONST_NULL)
-                    if (isStatic) {
-                        mv.visitInsn(ACONST_NULL);//null
-                    } else {
-                        mv.visitVarInsn(ALOAD, 0);//this
-                    }
-
-                    mv.visitLdcInsn(className);//className
-                    mv.visitLdcInsn(name);//methodbName
-                    mv.visitLdcInsn(getArgsType());//argsTypes
-                    mv.visitLdcInsn(returnType.className);//returntype
-
+                } else if (opcode == RETURN) {
+                    mv.visitInsn(ACONST_NULL)
+                    getArgs()
                     mv.visitMethodInsn(INVOKESTATIC, "com/miqt/pluginlib/tools/TimePrint",
                             "exit",
                             "(" +
-                                    "Ljava/lang/Object;" +
-                                    "Ljava/lang/Object;" +
+                                    "Ljava/lang/Object;" + //return
+                                    "Ljava/lang/Object;" + //this
                                     "Ljava/lang/String;" +
                                     "Ljava/lang/String;" +
                                     "Ljava/lang/String;" +
                                     "Ljava/lang/String;" +
+                                    "[Ljava/lang/Object;" +//prams
                                     ")V",
                             false);
                 }
 
 
+
             }
 
-            private String getAgesDesc() {
-                "(" +
-                        "Ljava/lang/Object;" +
-                        "Ljava/lang/String;" +
-                        "Ljava/lang/String;" +
-                        "Ljava/lang/String;" +
-                        "Ljava/lang/String;" +
-                        "[Ljava/lang/Object;" +
-                        ")V"
-            }
-
+            /**
+             * 装载this，方法名等共 6 个参数
+             */
             private void getArgs() {
-
-                if (isStatic) {
+                if (isStatic || isInit || isStaticInit) {
                     mv.visitInsn(ACONST_NULL);//null
                 } else {
                     mv.visitVarInsn(ALOAD, 0);//this
