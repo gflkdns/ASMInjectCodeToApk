@@ -10,6 +10,13 @@ public class TestClass2 {
     private static Map<String, String> a = null;
     private Context b;
 
+    public TestClass2() {
+        try {
+            TimePrint.enter((Object) null, "com.miqt.test.TestClass2", "<init>", "[]", "void", new Object[0]);
+        } catch (Throwable e) {
+        }
+    }
+
 
     public void a(String str, String str2) {
         try {
@@ -42,8 +49,9 @@ public class TestClass2 {
 
         return null;
     }
-    private int  testeee(int  num) {
-        int b = num +1;
+
+    private int testeee(int num) {
+        int b = num + 1;
         return b;
     }
 
